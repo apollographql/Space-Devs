@@ -1,0 +1,8 @@
+type Query {
+  allAgencies: [Agency!]!
+}
+
+type Agency {
+  id: ID!
+  name: String
+}

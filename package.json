@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "generate": "concurrently npm:generate:*",
+    "generate:resolver-types": "graphql-codegen",
+    "generate:rest-api": "swagger-typescript-api -p swagger.yaml -o ./src/pages/api/__generated__ -n ll2.ts",
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run generate && next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@as-integrations/next": "^1.2.0",
+    "@graphql-codegen/cli": "^2.16.4",
     "@next/font": "13.1.2",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
@@ -21,6 +26,10 @@
     "typescript": "4.9.4"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "^4.30.0"
+    "@graphql-codegen/typescript": "^2.8.7",
+    "@graphql-codegen/typescript-resolvers": "^2.7.12",
+    "@netlify/plugin-nextjs": "^4.30.0",
+    "concurrently": "^7.6.0",
+    "swagger-typescript-api": "^12.0.2"
   }
 }
