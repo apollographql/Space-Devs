@@ -1,5 +1,25 @@
+extend schema 
+	@link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
+
 type Query {
-  allAgencies: [Agency!]!
+  allAgencies: AgencyConnection!
+}
+
+type PageInfo @shareable {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type AgencyConnection {
+  edges: [AgencyEdge!]!
+  pageInfo: PageInfo
+}
+
+type AgencyEdge {
+  cursor: String!
+  node: Agency!
 }
 
 type Agency {
