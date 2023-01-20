@@ -19,7 +19,21 @@ const typeDefs = readFileSync(
   "utf-8"
 );
 
+const transformAgency = (a: LL2Agency): Agency => ({
+  id: a.id,
+  name: a.name,
+  url: a.url,
+  country: { code: a.country_code?.slice(0,2) ?? "US" },
+})
+
 const resolvers: Resolvers = {
+  Agency: {
+    async __resolveReference({id}, context){
+      const res = await context.ll2.v220.agenciesRetrieve(id);
+      if(!res.ok) return null;
+      return transformAgency(res.data);
+    }
+  },
   Query: {
     allAgencies: async (
       _parent,
@@ -37,12 +51,7 @@ const resolvers: Resolvers = {
         nodesLimitOffset.offset,
         first,
         last,
-        (a) => ({
-          id: a.id.toString(),
-          name: a.name,
-          url: a.url,
-          country: { code: a.country_code ?? "USA" },
-        })
+        transformAgency
       );
       
       return {

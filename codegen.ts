@@ -9,6 +9,7 @@ const config: CodegenConfig = {
     [path.join(api, "__generated__", "resolvers-types.ts")]: {
       config: {
         useIndexSignature: true,
+        federation: true,
         contextType: `${path.relative(__dirname, path.join(__dirname, "src", "server"))}#Context`,
       },
       plugins: ["typescript", "typescript-resolvers"],
