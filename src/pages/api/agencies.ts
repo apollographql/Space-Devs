@@ -15,7 +15,7 @@ import {
 } from "@/services/pagination-service";
 
 const typeDefs = readFileSync(
-  join(process.cwd(), "schemas", "schema.graphql"),
+  join(process.cwd(), "schemas", "agencies.graphql"),
   "utf-8"
 );
 

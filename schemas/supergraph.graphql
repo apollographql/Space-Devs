@@ -1,0 +1,183 @@
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.2", for: EXECUTION)
+{
+  query: Query
+}
+
+directive @join__field(graph: join__Graph!, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+type Agency
+  @join__type(graph: AGENCIES, key: "id")
+  @join__type(graph: ASTRONAUTS, key: "id")
+{
+  id: Int!
+  name: String @join__field(graph: AGENCIES)
+  url: String @join__field(graph: AGENCIES)
+  country: Country @join__field(graph: AGENCIES)
+}
+
+type AgencyConnection
+  @join__type(graph: AGENCIES)
+{
+  edges: [AgencyEdge!]!
+  pageInfo: PageInfo
+}
+
+type AgencyEdge
+  @join__type(graph: AGENCIES)
+{
+  cursor: String!
+  node: Agency!
+}
+
+type Astronaut
+  @join__type(graph: ASTRONAUTS, key: "id")
+{
+  id: Int!
+  name: String
+  url: String
+  agency: Agency
+}
+
+type AstronautConnection
+  @join__type(graph: ASTRONAUTS)
+{
+  edges: [AstronautEdge!]!
+  pageInfo: PageInfo
+}
+
+type AstronautEdge
+  @join__type(graph: ASTRONAUTS)
+{
+  cursor: String!
+  node: Astronaut!
+}
+
+type Continent
+  @join__type(graph: COUNTRIES, key: "code")
+{
+  code: ID!
+  name: String!
+  countries: [Country!]!
+}
+
+input ContinentFilterInput
+  @join__type(graph: COUNTRIES)
+{
+  code: StringQueryOperatorInput
+}
+
+type Country
+  @join__type(graph: AGENCIES, key: "code")
+  @join__type(graph: COUNTRIES, key: "code")
+{
+  code: ID!
+  name: String! @join__field(graph: COUNTRIES)
+  native: String! @join__field(graph: COUNTRIES)
+  phone: String! @join__field(graph: COUNTRIES)
+  continent: Continent! @join__field(graph: COUNTRIES)
+  capital: String @join__field(graph: COUNTRIES)
+  currency: String @join__field(graph: COUNTRIES)
+  languages: [Language!]! @join__field(graph: COUNTRIES)
+  emoji: String! @join__field(graph: COUNTRIES)
+  emojiU: String! @join__field(graph: COUNTRIES)
+  states: [State!]! @join__field(graph: COUNTRIES)
+}
+
+input CountryFilterInput
+  @join__type(graph: COUNTRIES)
+{
+  code: StringQueryOperatorInput
+  currency: StringQueryOperatorInput
+  continent: StringQueryOperatorInput
+}
+
+scalar join__FieldSet
+
+enum join__Graph {
+  AGENCIES @join__graph(name: "agencies", url: "https://apollo-spacex-api.netlify.app/api/agencies")
+  ASTRONAUTS @join__graph(name: "astronauts", url: "https://apollo-spacex-api.netlify.app/api/astronauts")
+  COUNTRIES @join__graph(name: "countries", url: "https://countries.trevorblades.com/")
+}
+
+type Language
+  @join__type(graph: COUNTRIES, key: "code")
+{
+  code: ID!
+  name: String
+  native: String
+  rtl: Boolean!
+}
+
+input LanguageFilterInput
+  @join__type(graph: COUNTRIES)
+{
+  code: StringQueryOperatorInput
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+type PageInfo
+  @join__type(graph: AGENCIES)
+  @join__type(graph: ASTRONAUTS)
+{
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Query
+  @join__type(graph: AGENCIES)
+  @join__type(graph: ASTRONAUTS)
+  @join__type(graph: COUNTRIES)
+{
+  allAgencies(first: Int, after: String, last: Int, before: String, limit: Int = 10): AgencyConnection! @join__field(graph: AGENCIES)
+  astronauts(first: Int, after: String, last: Int, before: String, limit: Int = 10): AstronautConnection! @join__field(graph: ASTRONAUTS)
+  countries(filter: CountryFilterInput): [Country!]! @join__field(graph: COUNTRIES)
+  country(code: ID!): Country @join__field(graph: COUNTRIES)
+  continents(filter: ContinentFilterInput): [Continent!]! @join__field(graph: COUNTRIES)
+  continent(code: ID!): Continent @join__field(graph: COUNTRIES)
+  languages(filter: LanguageFilterInput): [Language!]! @join__field(graph: COUNTRIES)
+  language(code: ID!): Language @join__field(graph: COUNTRIES)
+}
+
+type State
+  @join__type(graph: COUNTRIES)
+{
+  code: String
+  name: String!
+  country: Country!
+}
+
+input StringQueryOperatorInput
+  @join__type(graph: COUNTRIES)
+{
+  eq: String
+  ne: String
+  in: [String]
+  nin: [String]
+  regex: String
+  glob: String
+}

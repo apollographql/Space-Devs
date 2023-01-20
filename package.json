@@ -12,6 +12,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/gateway": "^2.2.3",
     "@apollo/subgraph": "^2.2.3",
     "@as-integrations/next": "^1.2.0",
     "@graphql-codegen/cli": "^2.16.4",

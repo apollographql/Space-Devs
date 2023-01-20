@@ -1,0 +1,14 @@
+federation_version: 2
+subgraphs:
+  agencies:
+    routing_url: https://apollo-spacex-api.netlify.app/api/agencies
+    schema:
+      file: ./schemas/agencies.graphql
+  astronauts:
+    routing_url: https://apollo-spacex-api.netlify.app/api/astronauts
+    schema:
+      file: ./schemas/astronauts.graphql
+  countries:
+    routing_url: https://countries.trevorblades.com/
+    schema: 
+      subgraph_url: https://countries.trevorblades.com/
