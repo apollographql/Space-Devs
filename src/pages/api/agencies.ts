@@ -13,7 +13,7 @@ import {
   getLimitOffset,
   getRelayPagination,
 } from "@/services/pagination-service";
-
+import alphaConvert from "countries-list/dist/countries3to2.json";
 const typeDefs = readFileSync(
   join(process.cwd(), "schemas", "agencies.graphql"),
   "utf-8"
@@ -23,7 +23,7 @@ const transformAgency = (a: LL2Agency): Agency => ({
   id: a.id,
   name: a.name,
   url: a.url,
-  country: { code: a.country_code?.slice(0,2) ?? "US" },
+  country: { code:  (alphaConvert as any)[a.country_code ?? "USA"] },
 })
 
 const resolvers: Resolvers = {
