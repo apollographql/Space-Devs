@@ -3,19 +3,10 @@ import { URL } from "url";
 export function getLimitAndOffsetFromURL(urlString: string): {
   limit: number;
   offset: number;
-} | null {
+} {
   const url = new URL(urlString);
-  const limit = url.searchParams.get("limit");
-  const offset = url.searchParams.get("offset");
-
-  if (
-    limit === undefined ||
-    limit === null ||
-    offset === undefined ||
-    offset === null
-  ) {
-    return null;
-  }
+  const limit = url.searchParams.get("limit") ?? "10";
+  const offset = url.searchParams.get("offset") ?? "0";
 
   return {
     limit: parseInt(limit),

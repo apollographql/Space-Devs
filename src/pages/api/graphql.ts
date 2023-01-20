@@ -1,9 +1,18 @@
 import { readFileSync } from "fs";
 import { join } from "path";
-import { Resolvers } from "./__generated__/resolvers-types";
-import { createHandler } from "@/server";
-import { getLimitAndOffsetFromURL } from "@/services/url-service";
-import { getCursorFromLimitAndOffset } from "@/services/cursor-service";
+import {
+  Agency,
+  Resolvers,
+} from "./__generated__/resolvers-types";
+import { Agency as LL2Agency } from "./__generated__/ll2";
+import { createHandler } from "../../server";
+import {
+  setCursors,
+} from "@/services/cursor-service";
+import {
+  getLimitOffset,
+  getRelayPagination,
+} from "@/services/pagination-service";
 
 const typeDefs = readFileSync(
   join(process.cwd(), "schemas", "schema.graphql"),
@@ -12,35 +21,37 @@ const typeDefs = readFileSync(
 
 const resolvers: Resolvers = {
   Query: {
-    allAgencies: async (_parent, _args, context) => {
-      const res = await context.ll2.v220.agenciesList();
-      if (!res.ok) {
-        return {
-          edges: [],
-          pageInfo: { hasNextPage: false, hasPreviousPage: false },
-        };
-      }
-      const nodes =
-        res.data.results?.map((a) => ({ id: a.id.toString(), name: a.name })) ??
-        [];
-      const edges = nodes.map((node) => ({
-        node,
-        cursor: node.id,
-      }));
+    allAgencies: async (
+      _parent,
+      { first, after, last, before, limit },
+      context
+    ) => {
+      //First we must convert the relay pagination arguments into { limit, offset } pattern
+      //https://relay.dev/graphql/connections.htm#sec-Arguments
+      let nodesLimitOffset = getLimitOffset(first, after, last, before, limit);
 
-      let endCursor: string | null = null;
-
-      if(res.data.next) {
-        const urlPageInfo = getLimitAndOffsetFromURL(res.data.next);
-        if(urlPageInfo) {
-          const {limit, offset} = urlPageInfo;
-          endCursor = getCursorFromLimitAndOffset(limit, offset);
-        }
-      }
-
+      const res = await context.ll2.v220.agenciesList({ ...nodesLimitOffset });
+      const { nodes, pageInfo } = getRelayPagination<Agency, LL2Agency>(
+        res,
+        nodesLimitOffset.limit,
+        nodesLimitOffset.offset,
+        first,
+        last,
+        (a) => ({
+          id: a.id.toString(),
+          name: a.name,
+          url: a.url,
+          country: { code: a.country_code ?? "USA" },
+        })
+      );
+      
       return {
-        edges,
-        pageInfo: { hasNextPage: false, hasPreviousPage: false, endCursor},
+        edges: setCursors(
+          nodes,
+          nodesLimitOffset.limit,
+          nodesLimitOffset.offset
+        ),
+        pageInfo,
       };
     },
   },

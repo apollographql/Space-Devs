@@ -1,8 +1,24 @@
-extend schema 
-	@link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.0"
+    import: ["@key", "@shareable"]
+  )
 
 type Query {
-  allAgencies: AgencyConnection!
+  allAgencies(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    limit: Int = 10
+  ): AgencyConnection!
+}
+
+input PaginationInput {
+  first: Int
+  after: String
+  last: Int
+  before: String
 }
 
 type PageInfo @shareable {
@@ -25,4 +41,10 @@ type AgencyEdge {
 type Agency {
   id: ID!
   name: String
+  url: String
+  country: Country
+}
+
+type Country @key(fields: "code") {
+  code: ID!
 }
